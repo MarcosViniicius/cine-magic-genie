@@ -79,12 +79,187 @@
     @apply bg-gradient-to-r from-slate-800 to-slate-700 border border-slate-600 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:from-blue-800 hover:to-purple-800 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/25;
   }
   
+  .quiz-option:hover {
+    animation: pulse-glow 1s ease-in-out infinite;
+  }
+  
   .genie-sparkle {
     animation: sparkle 2s ease-in-out infinite;
   }
   
+  .movie-card {
+    @apply transform transition-all duration-500 hover:scale-105 hover:shadow-2xl;
+  }
+  
+  .movie-card:hover {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .platform-badge {
+    @apply transform transition-all duration-200 hover:scale-110;
+  }
+  
+  .favorite-heart {
+    @apply transform transition-all duration-200;
+  }
+  
+  .favorite-heart:hover {
+    animation: heartbeat 0.6s ease-in-out;
+  }
+  
+  .trailer-overlay {
+    background: linear-gradient(45deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);
+  }
+  
   @keyframes sparkle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.1); }
+    0%, 100% { 
+      opacity: 1; 
+      transform: scale(1) rotate(0deg); 
+    }
+    25% { 
+      opacity: 0.8; 
+      transform: scale(1.05) rotate(90deg); 
+    }
+    50% { 
+      opacity: 0.9; 
+      transform: scale(1.1) rotate(180deg); 
+    }
+    75% { 
+      opacity: 0.8; 
+      transform: scale(1.05) rotate(270deg); 
+    }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(147, 51, 234, 0.5);
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) scale(1.05);
+    }
+    50% {
+      transform: translateY(-5px) scale(1.05);
+    }
+  }
+  
+  @keyframes heartbeat {
+    0% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.1);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+    75% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  
+  .shimmer {
+    background: linear-gradient(90deg, 
+      rgba(255,255,255,0) 0%, 
+      rgba(255,255,255,0.1) 50%, 
+      rgba(255,255,255,0) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Scrollbar personalizada */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(51, 65, 85, 0.3);
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #2563eb, #7c3aed);
+  }
+}
+
+/* Animações de entrada para os cards */
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Efeito de hover nos botões de plataforma */
+.platform-badge:hover {
+  animation: wiggle 0.3s ease-in-out;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+/* Animação de loading customizada */
+.loading-dots {
+  display: inline-block;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+  0%, 20% {
+    content: '';
+  }
+  40% {
+    content: '.';
+  }
+  60% {
+    content: '..';
+  }
+  80%, 100% {
+    content: '...';
   }
 }

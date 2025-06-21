@@ -28,10 +28,41 @@ export interface MovieRecommendation {
   type: 'movie' | 'tv' | 'anime';
   trailer_key?: string;
   platforms?: string[];
+  isFavorite?: boolean;
+  addedToHistoryAt?: string;
 }
 
 export interface AIRecommendationResponse {
   featured: MovieRecommendation;
   suggestions: MovieRecommendation[];
   reasoning: string;
+}
+
+export interface UserPreferences {
+  favoriteGenres: number[];
+  watchHistory: MovieRecommendation[];
+  preferredPlatforms: string[];
+  averageRatingPreference: number;
+  contentTypePreference: 'movie' | 'tv' | 'anime' | 'all';
+}
+
+export interface TMDBConfiguration {
+  images: {
+    base_url: string;
+    secure_base_url: string;
+    backdrop_sizes: string[];
+    logo_sizes: string[];
+    poster_sizes: string[];
+    profile_sizes: string[];
+    still_sizes: string[];
+  };
+}
+
+export interface TrailerData {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
 }
