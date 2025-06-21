@@ -83,6 +83,34 @@ export const tmdbService = {
     return response.json();
   },
 
+  async getMovieDetails(movieId: number): Promise<any> {
+    const response = await fetch(
+      `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&language=pt-BR`
+    );
+    return response.json();
+  },
+
+  async getTVDetails(tvId: number): Promise<any> {
+    const response = await fetch(
+      `${TMDB_BASE_URL}/tv/${tvId}?api_key=${TMDB_API_KEY}&language=pt-BR`
+    );
+    return response.json();
+  },
+
+  async getMovieCredits(movieId: number): Promise<any> {
+    const response = await fetch(
+      `${TMDB_BASE_URL}/movie/${movieId}/credits?api_key=${TMDB_API_KEY}&language=pt-BR`
+    );
+    return response.json();
+  },
+
+  async getTVCredits(tvId: number): Promise<any> {
+    const response = await fetch(
+      `${TMDB_BASE_URL}/tv/${tvId}/credits?api_key=${TMDB_API_KEY}&language=pt-BR`
+    );
+    return response.json();
+  },
+
   async getMovieVideos(movieId: number): Promise<any> {
     const response = await fetch(
       `${TMDB_BASE_URL}/movie/${movieId}/videos?api_key=${TMDB_API_KEY}&language=pt-BR`
@@ -104,8 +132,8 @@ export const tmdbService = {
     return response.json();
   },
 
-  getImageUrl(path: string): string {
+  getImageUrl(path: string, size: string = 'w500'): string {
     if (!path) return '/placeholder.svg';
-    return `${TMDB_IMAGE_BASE_URL}${path}`;
+    return `https://image.tmdb.org/t/p/${size}${path}`;
   }
 };
