@@ -15,12 +15,14 @@ export interface QuizAnswers {
 
 export interface MovieFilters {
   genres?: number[];
-  year?: number;
+  year?: [number, number];
   rating?: number;
   sort?: string;
   platforms?: string[];
-  duration?: string;
+  duration?: [number, number];
   adult?: boolean;
+  language?: string;
+  type?: string;
   [key: string]: any;
 }
 
@@ -40,6 +42,8 @@ export interface MovieRecommendation {
   popularity?: number;
   video?: boolean;
   media_type?: 'movie' | 'tv';
+  type?: 'movie' | 'tv';
+  platforms?: string[];
   // Campos para histórico e favoritos
   viewedAt?: string;
   favoriteAt?: string;

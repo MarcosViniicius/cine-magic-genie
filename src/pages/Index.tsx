@@ -11,8 +11,11 @@ import FavoritesModal from '../components/FavoritesModal';
 import HistoryModal from '../components/HistoryModal';
 import SettingsModal from '../components/SettingsModal';
 import MovieDetailsModal from '../components/MovieDetailsModal';
+import TrailerModal from '../components/TrailerModal';
 import { QuizAnswers, MovieFilters, MovieRecommendation } from '../types/cinema';
 import { useFavorites } from '../hooks/useFavorites';
+import { tmdbService } from '../services/tmdbService';
+import { useToast } from '../hooks/use-toast';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<'welcome' | 'quiz' | 'filters' | 'results'>('welcome');
@@ -24,8 +27,14 @@ const Index = () => {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showMovieDetailsModal, setShowMovieDetailsModal] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<MovieRecommendation | null>(null);
+  const [trailerModal, setTrailerModal] = useState<{ isOpen: boolean; videoKey: string; title: string }>({
+    isOpen: false,
+    videoKey: '',
+    title: ''
+  });
 
   const { addToHistory } = useFavorites();
+  const { toast } = useToast();
 
   const handleStartJourney = () => {
     setCurrentStep('quiz');
@@ -65,6 +74,38 @@ const Index = () => {
     setShowMovieDetailsModal(true);
   };
 
+  const handleWatchTrailer = async (movie: MovieRecommendation) => {
+    try {
+      const videos = movie.type === 'movie' 
+        ? await tmdbService.getMovieVideos(movie.id)
+        : await tmdbService.getTVVideos(movie.id);
+      
+      const trailer = videos.results?.find((video: any) => 
+        video.type === 'Trailer' && video.site === 'YouTube'
+      );
+
+      if (trailer) {
+        setTrailerModal({
+          isOpen: true,
+          videoKey: trailer.key,
+          title: movie.title
+        });
+      } else {
+        toast({
+          title: "Trailer não encontrado",
+          description: "Infelizmente não conseguimos encontrar um trailer para este título.",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao buscar trailer:', error);
+      toast({
+        title: "Erro ao carregar trailer",
+        description: "Tente novamente em alguns instantes.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (currentStep === 'quiz') {
     return (
       <div className="min-h-screen">
@@ -100,8 +141,15 @@ const Index = () => {
             isOpen={showMovieDetailsModal}
             onClose={() => setShowMovieDetailsModal(false)}
             movie={selectedMovie}
+            onWatchTrailer={handleWatchTrailer}
           />
         )}
+        <TrailerModal
+          isOpen={trailerModal.isOpen}
+          onClose={() => setTrailerModal({ ...trailerModal, isOpen: false })}
+          videoKey={trailerModal.videoKey}
+          title={trailerModal.title}
+        />
       </div>
     );
   }
@@ -141,8 +189,15 @@ const Index = () => {
             isOpen={showMovieDetailsModal}
             onClose={() => setShowMovieDetailsModal(false)}
             movie={selectedMovie}
+            onWatchTrailer={handleWatchTrailer}
           />
         )}
+        <TrailerModal
+          isOpen={trailerModal.isOpen}
+          onClose={() => setTrailerModal({ ...trailerModal, isOpen: false })}
+          videoKey={trailerModal.videoKey}
+          title={trailerModal.title}
+        />
       </div>
     );
   }
@@ -186,8 +241,15 @@ const Index = () => {
             isOpen={showMovieDetailsModal}
             onClose={() => setShowMovieDetailsModal(false)}
             movie={selectedMovie}
+            onWatchTrailer={handleWatchTrailer}
           />
         )}
+        <TrailerModal
+          isOpen={trailerModal.isOpen}
+          onClose={() => setTrailerModal({ ...trailerModal, isOpen: false })}
+          videoKey={trailerModal.videoKey}
+          title={trailerModal.title}
+        />
       </div>
     );
   }
@@ -298,8 +360,15 @@ const Index = () => {
           isOpen={showMovieDetailsModal}
           onClose={() => setShowMovieDetailsModal(false)}
           movie={selectedMovie}
+          onWatchTrailer={handleWatchTrailer}
         />
       )}
+      <TrailerModal
+        isOpen={trailerModal.isOpen}
+        onClose={() => setTrailerModal({ ...trailerModal, isOpen: false })}
+        videoKey={trailerModal.videoKey}
+        title={trailerModal.title}
+      />
     </div>
   );
 };
