@@ -7,13 +7,25 @@ import ResultsStep from '../components/ResultsStep';
 import Header from '../components/Header';
 import SupportModal from '../components/SupportModal';
 import SupportButton from '../components/SupportButton';
-import { QuizAnswers, MovieFilters } from '../types/cinema';
+import FavoritesModal from '../components/FavoritesModal';
+import HistoryModal from '../components/HistoryModal';
+import SettingsModal from '../components/SettingsModal';
+import MovieDetailsModal from '../components/MovieDetailsModal';
+import { QuizAnswers, MovieFilters, MovieRecommendation } from '../types/cinema';
+import { useFavorites } from '../hooks/useFavorites';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<'welcome' | 'quiz' | 'filters' | 'results'>('welcome');
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [filters, setFilters] = useState<MovieFilters>({});
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showMovieDetailsModal, setShowMovieDetailsModal] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<MovieRecommendation | null>(null);
+
+  const { addToHistory } = useFavorites();
 
   const handleStartJourney = () => {
     setCurrentStep('quiz');
@@ -36,15 +48,21 @@ const Index = () => {
   };
 
   const handleOpenFavorites = () => {
-    console.log('Abrir favoritos');
+    setShowFavoritesModal(true);
   };
 
   const handleOpenHistory = () => {
-    console.log('Abrir histórico');
+    setShowHistoryModal(true);
   };
 
   const handleOpenSettings = () => {
-    console.log('Abrir configurações');
+    setShowSettingsModal(true);
+  };
+
+  const handleMovieSelect = (movie: MovieRecommendation) => {
+    setSelectedMovie(movie);
+    addToHistory(movie);
+    setShowMovieDetailsModal(true);
   };
 
   if (currentStep === 'quiz') {
@@ -63,6 +81,27 @@ const Index = () => {
           isOpen={showSupportModal} 
           onClose={() => setShowSupportModal(false)} 
         />
+        <FavoritesModal
+          isOpen={showFavoritesModal}
+          onClose={() => setShowFavoritesModal(false)}
+          onMovieSelect={handleMovieSelect}
+        />
+        <HistoryModal
+          isOpen={showHistoryModal}
+          onClose={() => setShowHistoryModal(false)}
+          onMovieSelect={handleMovieSelect}
+        />
+        <SettingsModal
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+        />
+        {selectedMovie && (
+          <MovieDetailsModal
+            isOpen={showMovieDetailsModal}
+            onClose={() => setShowMovieDetailsModal(false)}
+            movie={selectedMovie}
+          />
+        )}
       </div>
     );
   }
@@ -83,6 +122,27 @@ const Index = () => {
           isOpen={showSupportModal} 
           onClose={() => setShowSupportModal(false)} 
         />
+        <FavoritesModal
+          isOpen={showFavoritesModal}
+          onClose={() => setShowFavoritesModal(false)}
+          onMovieSelect={handleMovieSelect}
+        />
+        <HistoryModal
+          isOpen={showHistoryModal}
+          onClose={() => setShowHistoryModal(false)}
+          onMovieSelect={handleMovieSelect}
+        />
+        <SettingsModal
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+        />
+        {selectedMovie && (
+          <MovieDetailsModal
+            isOpen={showMovieDetailsModal}
+            onClose={() => setShowMovieDetailsModal(false)}
+            movie={selectedMovie}
+          />
+        )}
       </div>
     );
   }
@@ -107,6 +167,27 @@ const Index = () => {
           isOpen={showSupportModal} 
           onClose={() => setShowSupportModal(false)} 
         />
+        <FavoritesModal
+          isOpen={showFavoritesModal}
+          onClose={() => setShowFavoritesModal(false)}
+          onMovieSelect={handleMovieSelect}
+        />
+        <HistoryModal
+          isOpen={showHistoryModal}
+          onClose={() => setShowHistoryModal(false)}
+          onMovieSelect={handleMovieSelect}
+        />
+        <SettingsModal
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+        />
+        {selectedMovie && (
+          <MovieDetailsModal
+            isOpen={showMovieDetailsModal}
+            onClose={() => setShowMovieDetailsModal(false)}
+            movie={selectedMovie}
+          />
+        )}
       </div>
     );
   }
@@ -192,14 +273,33 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Support Button */}
+      {/* All Modals */}
       <SupportButton onClick={() => setShowSupportModal(true)} />
-      
-      {/* Support Modal */}
       <SupportModal 
         isOpen={showSupportModal} 
         onClose={() => setShowSupportModal(false)} 
       />
+      <FavoritesModal
+        isOpen={showFavoritesModal}
+        onClose={() => setShowFavoritesModal(false)}
+        onMovieSelect={handleMovieSelect}
+      />
+      <HistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        onMovieSelect={handleMovieSelect}
+      />
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
+      {selectedMovie && (
+        <MovieDetailsModal
+          isOpen={showMovieDetailsModal}
+          onClose={() => setShowMovieDetailsModal(false)}
+          movie={selectedMovie}
+        />
+      )}
     </div>
   );
 };

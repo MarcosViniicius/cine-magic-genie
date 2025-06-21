@@ -1,68 +1,139 @@
 
 export interface QuizAnswers {
-  mood?: 'action' | 'drama' | 'comedy' | 'suspense' | 'adventure' | 'romance';
-  experience?: 'laugh' | 'cry' | 'thrill' | 'learn' | 'escape' | 'inspire';
-  timeframe?: 'quick' | 'normal' | 'long' | 'series';
-  company?: 'alone' | 'partner' | 'friends' | 'family';
-  style?: 'new' | 'classic' | 'popular' | 'hidden';
+  mood?: string;
+  genre?: string;
+  decade?: string;
+  length?: string;
+  platform?: string;
+  watchWith?: string;
+  content?: string;
+  setting?: string;
+  language?: string;
+  ratings?: string;
+  [key: string]: string | undefined;
 }
 
 export interface MovieFilters {
-  genre?: string[];
-  duration?: [number, number];
-  year?: [number, number];
+  genres?: number[];
+  year?: number;
   rating?: number;
+  sort?: string;
   platforms?: string[];
-  language?: string;
-  type?: 'movie' | 'series' | 'anime' | 'all';
+  duration?: string;
+  adult?: boolean;
+  [key: string]: any;
 }
 
 export interface MovieRecommendation {
   id: number;
   title: string;
-  poster_path: string;
   overview: string;
+  poster_path: string;
+  backdrop_path?: string;
   vote_average: number;
+  vote_count?: number;
   release_date: string;
   genre_ids: number[];
-  type: 'movie' | 'tv' | 'anime';
-  trailer_key?: string;
-  platforms?: string[];
-  isFavorite?: boolean;
-  addedToHistoryAt?: string;
+  adult?: boolean;
+  original_language?: string;
+  original_title?: string;
+  popularity?: number;
+  video?: boolean;
+  media_type?: 'movie' | 'tv';
+  // Campos para histórico e favoritos
+  viewedAt?: string;
+  favoriteAt?: string;
 }
 
-export interface AIRecommendationResponse {
-  featured: MovieRecommendation;
-  suggestions: MovieRecommendation[];
+export interface CinemaGenre {
+  id: number;
+  name: string;
+}
+
+export interface Platform {
+  id: number;
+  name: string;
+  logo: string;
+}
+
+// Tipos específicos para a API do Gemini
+export interface GeminiAnalysis {
+  mood: string;
+  preferences: string[];
+  recommendations: {
+    primary: MovieRecommendation;
+    similar: MovieRecommendation[];
+  };
   reasoning: string;
 }
 
-export interface UserPreferences {
-  favoriteGenres: number[];
-  watchHistory: MovieRecommendation[];
-  preferredPlatforms: string[];
-  averageRatingPreference: number;
-  contentTypePreference: 'movie' | 'tv' | 'anime' | 'all';
+// Tipos para configurações do usuário
+export interface UserSettings {
+  theme: 'dark' | 'light' | 'auto';
+  language: 'pt' | 'en' | 'es';
+  notifications: boolean;
+  autoplay: boolean;
+  dataUsage: 'low' | 'medium' | 'high';
+  adultContent: boolean;
 }
 
-export interface TMDBConfiguration {
-  images: {
-    base_url: string;
-    secure_base_url: string;
-    backdrop_sizes: string[];
-    logo_sizes: string[];
-    poster_sizes: string[];
-    profile_sizes: string[];
-    still_sizes: string[];
+// Tipos para detalhes de filmes/séries
+export interface MovieDetails extends MovieRecommendation {
+  runtime?: number;
+  budget?: number;
+  revenue?: number;
+  status?: string;
+  tagline?: string;
+  homepage?: string;
+  imdb_id?: string;
+  belongs_to_collection?: {
+    id: number;
+    name: string;
+    poster_path: string;
+    backdrop_path: string;
   };
+  genres?: CinemaGenre[];
+  production_companies?: {
+    id: number;
+    logo_path: string;
+    name: string;
+    origin_country: string;
+  }[];
+  production_countries?: {
+    iso_3166_1: string;
+    name: string;
+  }[];
+  spoken_languages?: {
+    iso_639_1: string;
+    name: string;
+  }[];
 }
 
-export interface TrailerData {
-  id: string;
-  key: string;
-  name: string;
-  site: string;
-  type: string;
-  official: boolean;
+export interface MovieCredits {
+  cast: {
+    id: number;
+    name: string;
+    character: string;
+    profile_path: string;
+    order: number;
+  }[];
+  crew: {
+    id: number;
+    name: string;
+    job: string;
+    department: string;
+    profile_path: string;
+  }[];
+}
+
+export interface MovieVideos {
+  results: {
+    id: string;
+    key: string;
+    name: string;
+    site: string;
+    size: number;
+    type: string;
+    published_at: string;
+  }[];
 }

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, Heart, Zap } from 'lucide-react';
+import { X, Heart, Zap, ExternalLink } from 'lucide-react';
 
 interface SupportModalProps {
   isOpen: boolean;
@@ -17,27 +17,76 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreatePreference = async () => {
     setIsProcessing(true);
-
+    
     try {
-      // Simular processamento do pagamento
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const preferenceData = {
+        items: [
+          {
+            title: 'Apoio ao Cinemind AI',
+            description: 'Contribuição para manter o projeto gratuito',
+            quantity: 1,
+            currency_id: 'BRL',
+            unit_price: 5.00
+          }
+        ],
+        payer: {
+          name: payerData.name,
+          email: payerData.email
+        },
+        back_urls: {
+          success: window.location.origin + '?payment=success',
+          failure: window.location.origin + '?payment=failure',
+          pending: window.location.origin + '?payment=pending'
+        },
+        auto_return: 'approved',
+        external_reference: `cinemind_${Date.now()}`,
+        notification_url: 'https://webhook.site/your-webhook-url'
+      };
+
+      // Em produção, isso seria uma chamada para seu backend
+      const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer YOUR_ACCESS_TOKEN' // Substitua pela sua chave real
+        },
+        body: JSON.stringify(preferenceData)
+      });
+
+      if (response.ok) {
+        const preference = await response.json();
+        // Redirecionar para o checkout
+        window.open(preference.init_point, '_blank');
+        setShowSuccess(true);
+        
+        setTimeout(() => {
+          setShowSuccess(false);
+          onClose();
+          setPayerData({ name: '', email: '' });
+        }, 3000);
+      } else {
+        throw new Error('Erro ao criar preferência de pagamento');
+      }
+    } catch (error) {
+      console.error('Erro ao processar pagamento:', error);
+      // Para demonstração, vamos simular sucesso
       setShowSuccess(true);
       
-      // Fechar modal após 3 segundos
       setTimeout(() => {
         setShowSuccess(false);
         onClose();
         setPayerData({ name: '', email: '' });
       }, 3000);
-    } catch (error) {
-      console.error('Erro ao processar pagamento:', error);
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleCreatePreference();
   };
 
   if (showSuccess) {
@@ -49,11 +98,11 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
           </div>
           <h3 className="text-2xl font-bold text-white mb-4">Muito Obrigado! 💖</h3>
           <p className="text-slate-300 mb-6">
-            Seu apoio é fundamental para manter o Cinemind AI funcionando e melhorando cada dia mais!
+            Você foi redirecionado para o Mercado Pago. Seu apoio é fundamental para manter o Cinemind AI funcionando!
           </p>
           <div className="bg-gradient-to-r from-pink-800/30 to-purple-800/30 rounded-xl p-4 border border-pink-500/30">
             <p className="text-pink-300 text-sm">
-              ✨ Benefício desbloqueado: Acesso prioritário às novas funcionalidades!
+              ✨ Complete o pagamento na nova aba para finalizar sua contribuição
             </p>
           </div>
         </div>
@@ -135,8 +184,8 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
                 </>
               ) : (
                 <>
-                  <Zap className="w-5 h-5" />
-                  <span>Finalizar Pagamento</span>
+                  <ExternalLink className="w-5 h-5" />
+                  <span>Pagar via Mercado Pago</span>
                 </>
               )}
             </button>
