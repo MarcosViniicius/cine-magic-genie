@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
-import { Star, Play, Share, Heart, RefreshCw, Sparkles, ExternalLink, Youtube } from 'lucide-react';
+import { Star, Play, Share, Heart, RefreshCw, Sparkles, Youtube, Info } from 'lucide-react';
 import { QuizAnswers, MovieFilters, MovieRecommendation } from '../types/cinema';
 import { useToast } from '../hooks/use-toast';
 import { tmdbService } from '../services/tmdbService';
 import { geminiService } from '../services/geminiService';
 import { useFavorites } from '../hooks/useFavorites';
 import TrailerModal from './TrailerModal';
+import MovieDetailsModal from './MovieDetailsModal';
 
 interface ResultsStepProps {
   quizAnswers: QuizAnswers;
@@ -24,6 +24,10 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
     videoKey: '',
     title: ''
   });
+  const [detailsModal, setDetailsModal] = useState<{ isOpen: boolean; movie: MovieRecommendation | null }>({
+    isOpen: false,
+    movie: null
+  });
   const { toast } = useToast();
   const { favorites, toggleFavorite, isFavorite, addToHistory, history } = useFavorites();
 
@@ -35,7 +39,6 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
     setLoading(true);
     
     try {
-      // Gerar recomendações usando Gemini AI
       const aiRecommendations = await geminiService.generateRecommendations(
         quizAnswers,
         filters,
@@ -44,7 +47,6 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
 
       console.log('Recomendações da IA:', aiRecommendations);
       
-      // Buscar dados detalhados no TMDB
       const [featuredData, ...suggestionsData] = await Promise.all([
         searchMovieDetails(aiRecommendations.featured),
         ...aiRecommendations.suggestions.map(title => searchMovieDetails(title))
@@ -67,7 +69,6 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
         variant: "destructive"
       });
       
-      // Fallback para recomendações populares
       await generateFallbackRecommendations();
     }
     
@@ -182,10 +183,14 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
     window.open(url, '_blank');
   };
 
+  const openMovieDetails = (movie: MovieRecommendation) => {
+    setDetailsModal({ isOpen: true, movie });
+  };
+
   const getPlatformInfo = (platforms: string[] = []) => {
     const platformMap: { [key: string]: { name: string; color: string } } = {
       netflix: { name: 'Netflix', color: 'bg-red-600' },
-      prime: { name: 'Prime', color: 'bg-blue-600' },
+      prime: { name: 'Prime Video', color: 'bg-blue-600' },
       disney: { name: 'Disney+', color: 'bg-indigo-600' },
       hbo: { name: 'HBO Max', color: 'bg-purple-600' },
       paramount: { name: 'Paramount+', color: 'bg-blue-500' },
@@ -199,13 +204,13 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6 genie-sparkle"></div>
+          <div className="w-20 h-20 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-6 genie-sparkle"></div>
           <h2 className="text-3xl font-bold text-white mb-4">🧞‍♂️ Conjurando recomendações mágicas...</h2>
           <p className="text-slate-300">Nosso Cine-Gênio está analisando seus gostos únicos</p>
           <div className="mt-4 flex justify-center space-x-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
             <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
         </div>
       </div>
@@ -226,7 +231,7 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
           </p>
           
           {reasoning && (
-            <div className="bg-gradient-to-r from-blue-800/30 to-purple-800/30 backdrop-blur-lg rounded-xl p-6 border border-blue-500/30 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-r from-pink-800/30 to-purple-800/30 backdrop-blur-lg rounded-xl p-6 border border-pink-500/30 max-w-2xl mx-auto">
               <p className="text-slate-200 text-lg italic">"{reasoning}"</p>
             </div>
           )}
@@ -284,10 +289,17 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
                   <div className="flex flex-wrap gap-4">
                     <button 
                       onClick={() => handleWatchTrailer(featuredMovie)}
-                      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-full flex items-center magic-button"
+                      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-xl flex items-center magic-button"
                     >
                       <Youtube className="w-5 h-5 mr-2" />
                       Ver Trailer
+                    </button>
+                    <button
+                      onClick={() => openMovieDetails(featuredMovie)}
+                      className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl flex items-center magic-button"
+                    >
+                      <Info className="w-5 h-5 mr-2" />
+                      Ver Detalhes
                     </button>
                     <button
                       onClick={() => toggleFavorite(featuredMovie)}
@@ -295,14 +307,14 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
                         isFavorite(featuredMovie.id)
                           ? 'bg-gradient-to-r from-pink-600 to-pink-700'
                           : 'bg-slate-700 hover:bg-slate-600'
-                      } text-white font-bold py-3 px-6 rounded-full flex items-center magic-button`}
+                      } text-white font-bold py-3 px-6 rounded-xl flex items-center magic-button`}
                     >
                       <Heart className={`w-5 h-5 mr-2 ${isFavorite(featuredMovie.id) ? 'fill-current' : ''}`} />
                       {isFavorite(featuredMovie.id) ? 'Favoritado' : 'Favoritar'}
                     </button>
                     <button
                       onClick={() => shareRecommendation(featuredMovie)}
-                      className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full flex items-center magic-button"
+                      className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl flex items-center magic-button"
                     >
                       <Share className="w-5 h-5 mr-2" />
                       Compartilhar
@@ -323,7 +335,7 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {suggestions.map((movie) => (
               <div key={movie.id} className="group">
-                <div className="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-slate-600 hover:border-blue-500 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/25 hover:-translate-y-2">
+                <div className="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-slate-600 hover:border-pink-500 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/25 hover:-translate-y-2">
                   <div className="relative mb-4">
                     <img
                       src={movie.poster_path}
@@ -372,7 +384,11 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
                   </div>
                   
                   <div className="flex gap-2">
-                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                    <button 
+                      onClick={() => openMovieDetails(movie)}
+                      className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center magic-button"
+                    >
+                      <Info className="w-4 h-4 mr-1" />
                       Detalhes
                     </button>
                     <button
@@ -407,12 +423,19 @@ const ResultsStep: React.FC<ResultsStepProps> = ({ quizAnswers, filters, onNewSe
           </button>
         </div>
 
-        {/* Trailer Modal */}
+        {/* Modals */}
         <TrailerModal
           isOpen={trailerModal.isOpen}
           onClose={() => setTrailerModal({ ...trailerModal, isOpen: false })}
           videoKey={trailerModal.videoKey}
           title={trailerModal.title}
+        />
+
+        <MovieDetailsModal
+          isOpen={detailsModal.isOpen}
+          onClose={() => setDetailsModal({ isOpen: false, movie: null })}
+          movie={detailsModal.movie}
+          onWatchTrailer={handleWatchTrailer}
         />
       </div>
     </div>
