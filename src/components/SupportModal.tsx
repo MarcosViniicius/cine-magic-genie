@@ -1,21 +1,7 @@
-
-import React, { useState, useEffect } from 'react';
-import { X, Heart, Zap, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
-
-// Fallback para toast caso não esteja disponível
-const showToast = (message: string, type: 'error' | 'success' = 'error') => {
-  try {
-    if (type === 'error') {
-      toast.error(message);
-    } else {
-      toast.success(message);
-    }
-  } catch (error) {
-    console.error('Toast error:', error);
-    alert(message);
-  }
-};
+import React, { useState, useEffect } from "react";
+import { X, Heart, ExternalLink, CheckCircle, AlertCircle } from "lucide-react";
+import { usePayment } from "@/hooks/usePayment";
+import { toast } from "sonner";
 
 interface SupportModalProps {
   isOpen: boolean;
@@ -24,37 +10,37 @@ interface SupportModalProps {
 
 const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
   const [payerData, setPayerData] = useState({
-    name: '',
-    email: ''
+    name: "",
+    email: "",
   });
-  
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+
+  const { isProcessing, showSuccess, processPayment, resetPayment } =
+    usePayment();
 
   // Debug log
-  console.log('SupportModal render:', { isOpen, showSuccess });
+  console.log("SupportModal render:", { isOpen, showSuccess });
 
   // Verificar se há dados de pagamento salvos
   useEffect(() => {
     if (isOpen) {
-      const savedData = localStorage.getItem('cinemind_payment_data');
+      const savedData = localStorage.getItem("cinemind_payment_data");
       if (savedData) {
         try {
           const data = JSON.parse(savedData);
           setPayerData({ name: data.name, email: data.email });
         } catch (error) {
-          console.error('Erro ao carregar dados salvos:', error);
+          console.error("Erro ao carregar dados salvos:", error);
         }
       }
     }
   }, [isOpen]);
 
   if (!isOpen) {
-    console.log('Modal is not open, returning null');
+    console.log("Modal is not open, returning null");
     return null;
   }
 
-  console.log('Modal is open, rendering...');
+  console.log("Modal is open, rendering...");
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -63,37 +49,24 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!payerData.name.trim()) {
-      showToast('Por favor, informe seu nome.');
+      toast.error("Por favor, informe seu nome.");
       return;
     }
-
     if (!payerData.email.trim()) {
-      showToast('Por favor, informe seu e-mail.');
+      toast.error("Por favor, informe seu e-mail.");
       return;
     }
-
     if (!validateEmail(payerData.email)) {
-      showToast('Por favor, informe um e-mail válido.');
+      toast.error("Por favor, informe um e-mail válido.");
       return;
     }
-
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        onClose();
-      }, 3000);
-    }, 1000);
+    await processPayment({ name: payerData.name, email: payerData.email });
   };
 
   const handleClose = () => {
-    setShowSuccess(false);
-    setIsProcessing(false);
-    setPayerData({ name: '', email: '' });
+    resetPayment();
+    setPayerData({ name: "", email: "" });
     onClose();
   };
 
@@ -104,9 +77,12 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
           <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-4">Redirecionando... 🚀</h3>
+          <h3 className="text-2xl font-bold text-white mb-4">
+            Redirecionando... 🚀
+          </h3>
           <p className="text-slate-300 mb-6">
-            Você será redirecionado para o Mercado Pago em uma nova aba. Seu apoio é fundamental para manter o Cinemind AI gratuito!
+            Você será redirecionado para o Mercado Pago em uma nova aba. Seu
+            apoio é fundamental para manter o Cinemind AI gratuito!
           </p>
           <div className="bg-gradient-to-r from-pink-800/30 to-purple-800/30 rounded-xl p-4 border border-pink-500/30">
             <p className="text-pink-300 text-sm">
@@ -125,20 +101,20 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
         zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem'
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
       }}
     >
       <div className="bg-slate-900 rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden border border-slate-700">
@@ -171,21 +147,27 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
             <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
               <p className="text-yellow-300 text-sm flex items-center justify-center gap-2">
                 <AlertCircle className="w-4 h-4" />
-                Modo de demonstração - Configure o token do MercadoPago para pagamentos reais
+                Modo de demonstração - Configure o token do MercadoPago para
+                pagamentos reais
               </p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-white text-sm font-medium mb-2">
+              <label
+                htmlFor="name"
+                className="block text-white text-sm font-medium mb-2"
+              >
                 Nome completo
               </label>
               <input
                 type="text"
                 id="name"
                 value={payerData.name}
-                onChange={(e) => setPayerData({ ...payerData, name: e.target.value })}
+                onChange={(e) =>
+                  setPayerData({ ...payerData, name: e.target.value })
+                }
                 className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:border-pink-500 focus:outline-none transition-colors"
                 placeholder="Seu nome"
                 required
@@ -193,14 +175,19 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-white text-sm font-medium mb-2">
+              <label
+                htmlFor="email"
+                className="block text-white text-sm font-medium mb-2"
+              >
                 E-mail
               </label>
               <input
                 type="email"
                 id="email"
                 value={payerData.email}
-                onChange={(e) => setPayerData({ ...payerData, email: e.target.value })}
+                onChange={(e) =>
+                  setPayerData({ ...payerData, email: e.target.value })
+                }
                 className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:border-pink-500 focus:outline-none transition-colors"
                 placeholder="seu@email.com"
                 required
