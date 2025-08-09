@@ -1,6 +1,21 @@
 
-import React, { useState } from 'react';
-import { X, Heart, Zap, ExternalLink } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Heart, Zap, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+
+// Fallback para toast caso não esteja disponível
+const showToast = (message: string, type: 'error' | 'success' = 'error') => {
+  try {
+    if (type === 'error') {
+      toast.error(message);
+    } else {
+      toast.success(message);
+    }
+  } catch (error) {
+    console.error('Toast error:', error);
+    alert(message);
+  }
+};
 
 interface SupportModalProps {
   isOpen: boolean;
@@ -12,106 +27,120 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
     name: '',
     email: ''
   });
+  
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  if (!isOpen) return null;
+  // Debug log
+  console.log('SupportModal render:', { isOpen, showSuccess });
 
-  const handleCreatePreference = async () => {
-    setIsProcessing(true);
-    
-    try {
-      const preferenceData = {
-        items: [
-          {
-            title: 'Apoio ao Cinemind AI',
-            description: 'Contribuição para manter o projeto gratuito',
-            quantity: 1,
-            currency_id: 'BRL',
-            unit_price: 5.00
-          }
-        ],
-        payer: {
-          name: payerData.name,
-          email: payerData.email
-        },
-        back_urls: {
-          success: window.location.origin + '?payment=success',
-          failure: window.location.origin + '?payment=failure',
-          pending: window.location.origin + '?payment=pending'
-        },
-        auto_return: 'approved',
-        external_reference: `cinemind_${Date.now()}`,
-        notification_url: 'https://webhook.site/your-webhook-url'
-      };
-
-      // Em produção, isso seria uma chamada para seu backend
-      const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer YOUR_ACCESS_TOKEN' // Substitua pela sua chave real
-        },
-        body: JSON.stringify(preferenceData)
-      });
-
-      if (response.ok) {
-        const preference = await response.json();
-        // Redirecionar para o checkout
-        window.open(preference.init_point, '_blank');
-        setShowSuccess(true);
-        
-        setTimeout(() => {
-          setShowSuccess(false);
-          onClose();
-          setPayerData({ name: '', email: '' });
-        }, 3000);
-      } else {
-        throw new Error('Erro ao criar preferência de pagamento');
+  // Verificar se há dados de pagamento salvos
+  useEffect(() => {
+    if (isOpen) {
+      const savedData = localStorage.getItem('cinemind_payment_data');
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          setPayerData({ name: data.name, email: data.email });
+        } catch (error) {
+          console.error('Erro ao carregar dados salvos:', error);
+        }
       }
-    } catch (error) {
-      console.error('Erro ao processar pagamento:', error);
-      // Para demonstração, vamos simular sucesso
-      setShowSuccess(true);
-      
-      setTimeout(() => {
-        setShowSuccess(false);
-        onClose();
-        setPayerData({ name: '', email: '' });
-      }, 3000);
-    } finally {
-      setIsProcessing(false);
     }
+  }, [isOpen]);
+
+  if (!isOpen) {
+    console.log('Modal is not open, returning null');
+    return null;
+  }
+
+  console.log('Modal is open, rendering...');
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleCreatePreference();
+    
+    if (!payerData.name.trim()) {
+      showToast('Por favor, informe seu nome.');
+      return;
+    }
+
+    if (!payerData.email.trim()) {
+      showToast('Por favor, informe seu e-mail.');
+      return;
+    }
+
+    if (!validateEmail(payerData.email)) {
+      showToast('Por favor, informe um e-mail válido.');
+      return;
+    }
+
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+      }, 3000);
+    }, 1000);
+  };
+
+  const handleClose = () => {
+    setShowSuccess(false);
+    setIsProcessing(false);
+    setPayerData({ name: '', email: '' });
+    onClose();
   };
 
   if (showSuccess) {
     return (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
         <div className="bg-slate-900 rounded-2xl max-w-md w-full p-8 text-center border border-pink-500/30">
-          <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Heart className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-4">Muito Obrigado! 💖</h3>
+          <h3 className="text-2xl font-bold text-white mb-4">Redirecionando... 🚀</h3>
           <p className="text-slate-300 mb-6">
-            Você foi redirecionado para o Mercado Pago. Seu apoio é fundamental para manter o Cinemind AI funcionando!
+            Você será redirecionado para o Mercado Pago em uma nova aba. Seu apoio é fundamental para manter o Cinemind AI gratuito!
           </p>
           <div className="bg-gradient-to-r from-pink-800/30 to-purple-800/30 rounded-xl p-4 border border-pink-500/30">
             <p className="text-pink-300 text-sm">
-              ✨ Complete o pagamento na nova aba para finalizar sua contribuição
+              ✨ Complete o pagamento para finalizar sua contribuição
             </p>
           </div>
+          <button
+            onClick={handleClose}
+            className="mt-6 w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+          >
+            Fechar
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem'
+      }}
+    >
       <div className="bg-slate-900 rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden border border-slate-700">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
@@ -122,7 +151,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
             <h3 className="text-xl font-bold text-white">Apoie o Projeto</h3>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-8 h-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors"
           >
             <X className="w-4 h-4 text-white" />
@@ -138,6 +167,12 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
             <div className="bg-gradient-to-r from-pink-800/30 to-purple-800/30 rounded-xl p-4 border border-pink-500/30">
               <div className="text-3xl font-bold text-white mb-2">R$ 5,00</div>
               <p className="text-pink-300 text-sm">Contribuição única</p>
+            </div>
+            <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+              <p className="text-yellow-300 text-sm flex items-center justify-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Modo de demonstração - Configure o token do MercadoPago para pagamentos reais
+              </p>
             </div>
           </div>
 

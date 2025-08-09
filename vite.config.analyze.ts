@@ -1,25 +1,18 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
+export default defineConfig({
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
-    mode === 'analyze' && visualizer({
+    visualizer({
       filename: "dist/stats.html",
       open: true,
       gzipSize: true,
       brotliSize: true,
     }),
-  ].filter(Boolean),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -38,7 +31,4 @@ export default defineConfig(({ mode }) => ({
     },
     chunkSizeWarningLimit: 1000,
   },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'lucide-react'],
-  },
-}));
+}); 

@@ -1,57 +1,72 @@
-
-import React, { useState } from 'react';
-import { Star, Sparkles, Wand2, Film, Search, Settings } from 'lucide-react';
-import QuizStep from '../components/QuizStep';
-import FiltersStep from '../components/FiltersStep';
-import ResultsStep from '../components/ResultsStep';
-import Header from '../components/Header';
-import SupportModal from '../components/SupportModal';
-import SupportButton from '../components/SupportButton';
-import FavoritesModal from '../components/FavoritesModal';
-import HistoryModal from '../components/HistoryModal';
-import SettingsModal from '../components/SettingsModal';
-import MovieDetailsModal from '../components/MovieDetailsModal';
-import TrailerModal from '../components/TrailerModal';
-import { QuizAnswers, MovieFilters, MovieRecommendation } from '../types/cinema';
-import { useFavorites } from '../hooks/useFavorites';
-import { tmdbService } from '../services/tmdbService';
-import { useToast } from '../hooks/use-toast';
+import React, { useState } from "react";
+import { Star, Sparkles, Wand2, Film, Search, Settings } from "lucide-react";
+import QuizStep from "../components/QuizStep";
+import FiltersStep from "../components/FiltersStep";
+import ResultsStep from "../components/ResultsStep";
+import Header from "../components/Header";
+import SupportModal from "../components/SupportModal";
+import SupportModalSimple from "../components/SupportModalSimple";
+import SimpleModal from "../components/SimpleModal";
+import UltraSimpleModal from "../components/UltraSimpleModal";
+import SupportButton from "../components/SupportButton";
+import FavoritesModal from "../components/FavoritesModal";
+import HistoryModal from "../components/HistoryModal";
+import SettingsModal from "../components/SettingsModal";
+import MovieDetailsModal from "../components/MovieDetailsModal";
+import TrailerModal from "../components/TrailerModal";
+import {
+  QuizAnswers,
+  MovieFilters,
+  MovieRecommendation,
+} from "../types/cinema";
+import { useFavorites } from "../hooks/useFavorites";
+import { tmdbService } from "../services/tmdbService";
+import { useToast } from "../hooks/use-toast";
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState<'welcome' | 'quiz' | 'filters' | 'results'>('welcome');
+  const [currentStep, setCurrentStep] = useState<
+    "welcome" | "quiz" | "filters" | "results"
+  >("welcome");
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [filters, setFilters] = useState<MovieFilters>({});
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showSimpleModal, setShowSimpleModal] = useState(false);
+  const [showUltraSimpleModal, setShowUltraSimpleModal] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showMovieDetailsModal, setShowMovieDetailsModal] = useState(false);
-  const [selectedMovie, setSelectedMovie] = useState<MovieRecommendation | null>(null);
-  const [trailerModal, setTrailerModal] = useState<{ isOpen: boolean; videoKey: string; title: string }>({
+  const [selectedMovie, setSelectedMovie] =
+    useState<MovieRecommendation | null>(null);
+  const [trailerModal, setTrailerModal] = useState<{
+    isOpen: boolean;
+    videoKey: string;
+    title: string;
+  }>({
     isOpen: false,
-    videoKey: '',
-    title: ''
+    videoKey: "",
+    title: "",
   });
 
   const { addToHistory } = useFavorites();
   const { toast } = useToast();
 
   const handleStartJourney = () => {
-    setCurrentStep('quiz');
+    setCurrentStep("quiz");
   };
 
   const handleQuizComplete = (answers: QuizAnswers) => {
     setQuizAnswers(answers);
-    setCurrentStep('filters');
+    setCurrentStep("filters");
   };
 
   const handleFiltersComplete = (userFilters: MovieFilters) => {
     setFilters(userFilters);
-    setCurrentStep('results');
+    setCurrentStep("results");
   };
 
   const handleNewSearch = () => {
-    setCurrentStep('quiz');
+    setCurrentStep("quiz");
     setQuizAnswers({});
     setFilters({});
   };
@@ -68,6 +83,18 @@ const Index = () => {
     setShowSettingsModal(true);
   };
 
+  const handleSupportClick = () => {
+    console.log("Support clicked, setting modal to true");
+    console.log("Current showSupportModal state:", showSupportModal);
+    setShowSupportModal(true);
+    console.log("After setShowSupportModal(true)");
+
+    // Verificar se o estado mudou após um delay
+    setTimeout(() => {
+      console.log("showSupportModal state after timeout:", showSupportModal);
+    }, 100);
+  };
+
   const handleMovieSelect = (movie: MovieRecommendation) => {
     setSelectedMovie(movie);
     addToHistory(movie);
@@ -76,40 +103,42 @@ const Index = () => {
 
   const handleWatchTrailer = async (movie: MovieRecommendation) => {
     try {
-      const videos = movie.type === 'movie' 
-        ? await tmdbService.getMovieVideos(movie.id)
-        : await tmdbService.getTVVideos(movie.id);
-      
-      const trailer = videos.results?.find((video: any) => 
-        video.type === 'Trailer' && video.site === 'YouTube'
+      const videos =
+        movie.type === "movie"
+          ? await tmdbService.getMovieVideos(movie.id)
+          : await tmdbService.getTVVideos(movie.id);
+
+      const trailer = videos.results?.find(
+        (video) => video.type === "Trailer" && video.site === "YouTube"
       );
 
       if (trailer) {
         setTrailerModal({
           isOpen: true,
           videoKey: trailer.key,
-          title: movie.title
+          title: movie.title,
         });
       } else {
         toast({
           title: "Trailer não encontrado",
-          description: "Infelizmente não conseguimos encontrar um trailer para este título.",
+          description:
+            "Infelizmente não conseguimos encontrar um trailer para este título.",
         });
       }
     } catch (error) {
-      console.error('Erro ao buscar trailer:', error);
+      console.error("Erro ao buscar trailer:", error);
       toast({
         title: "Erro ao carregar trailer",
         description: "Tente novamente em alguns instantes.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  if (currentStep === 'quiz') {
+  if (currentStep === "quiz") {
     return (
       <div className="min-h-screen">
-        <Header 
+        <Header
           onOpenFavorites={handleOpenFavorites}
           onOpenHistory={handleOpenHistory}
           onOpenSettings={handleOpenSettings}
@@ -117,10 +146,10 @@ const Index = () => {
         <div className="pt-20">
           <QuizStep onComplete={handleQuizComplete} />
         </div>
-        <SupportButton onClick={() => setShowSupportModal(true)} />
-        <SupportModal 
-          isOpen={showSupportModal} 
-          onClose={() => setShowSupportModal(false)} 
+        <SupportButton onClick={handleSupportClick} />
+        <SupportModal
+          isOpen={showSupportModal}
+          onClose={() => setShowSupportModal(false)}
         />
         <FavoritesModal
           isOpen={showFavoritesModal}
@@ -154,21 +183,24 @@ const Index = () => {
     );
   }
 
-  if (currentStep === 'filters') {
+  if (currentStep === "filters") {
     return (
       <div className="min-h-screen">
-        <Header 
+        <Header
           onOpenFavorites={handleOpenFavorites}
           onOpenHistory={handleOpenHistory}
           onOpenSettings={handleOpenSettings}
         />
         <div className="pt-20">
-          <FiltersStep quizAnswers={quizAnswers} onComplete={handleFiltersComplete} />
+          <FiltersStep
+            quizAnswers={quizAnswers}
+            onComplete={handleFiltersComplete}
+          />
         </div>
-        <SupportButton onClick={() => setShowSupportModal(true)} />
-        <SupportModal 
-          isOpen={showSupportModal} 
-          onClose={() => setShowSupportModal(false)} 
+        <SupportButton onClick={handleSupportClick} />
+        <SupportModal
+          isOpen={showSupportModal}
+          onClose={() => setShowSupportModal(false)}
         />
         <FavoritesModal
           isOpen={showFavoritesModal}
@@ -202,25 +234,25 @@ const Index = () => {
     );
   }
 
-  if (currentStep === 'results') {
+  if (currentStep === "results") {
     return (
       <div className="min-h-screen">
-        <Header 
+        <Header
           onOpenFavorites={handleOpenFavorites}
           onOpenHistory={handleOpenHistory}
           onOpenSettings={handleOpenSettings}
         />
         <div className="pt-20">
-          <ResultsStep 
-            quizAnswers={quizAnswers} 
-            filters={filters} 
-            onNewSearch={handleNewSearch} 
+          <ResultsStep
+            quizAnswers={quizAnswers}
+            filters={filters}
+            onNewSearch={handleNewSearch}
           />
         </div>
-        <SupportButton onClick={() => setShowSupportModal(true)} />
-        <SupportModal 
-          isOpen={showSupportModal} 
-          onClose={() => setShowSupportModal(false)} 
+        <SupportButton onClick={handleSupportClick} />
+        <SupportModal
+          isOpen={showSupportModal}
+          onClose={() => setShowSupportModal(false)}
         />
         <FavoritesModal
           isOpen={showFavoritesModal}
@@ -256,12 +288,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Header 
+      <Header
         onOpenFavorites={handleOpenFavorites}
         onOpenHistory={handleOpenHistory}
         onOpenSettings={handleOpenSettings}
       />
-      
+
       {/* Main Content */}
       <div className="pt-20 min-h-screen flex items-center justify-center px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -291,9 +323,9 @@ const Index = () => {
               <Sparkles className="w-8 h-8 text-yellow-400 ml-3 genie-sparkle" />
             </div>
             <p className="text-slate-300 text-lg mb-6 max-w-2xl mx-auto leading-relaxed">
-              Esfregue a lâmpada mágica dos seus gostos e deixe nosso Cine-Gênio descobrir 
-              o filme, série ou anime perfeito para o seu momento. Uma jornada única de descoberta 
-              cinematográfica te aguarda!
+              Esfregue a lâmpada mágica dos seus gostos e deixe nosso Cine-Gênio
+              descobrir o filme, série ou anime perfeito para o seu momento. Uma
+              jornada única de descoberta cinematográfica te aguarda!
             </p>
           </div>
 
@@ -301,18 +333,30 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             <div className="bg-gradient-to-br from-pink-800/30 to-pink-600/30 backdrop-blur-lg rounded-xl p-6 border border-pink-500/30 hover:border-pink-400/50 transition-all duration-300 hover:-translate-y-1">
               <Search className="w-12 h-12 text-pink-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Quiz Mágico</h3>
-              <p className="text-slate-300">Perguntas divertidas que revelam seus gostos únicos</p>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Quiz Mágico
+              </h3>
+              <p className="text-slate-300">
+                Perguntas divertidas que revelam seus gostos únicos
+              </p>
             </div>
             <div className="bg-gradient-to-br from-purple-800/30 to-purple-600/30 backdrop-blur-lg rounded-xl p-6 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 hover:-translate-y-1">
               <Settings className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Filtros Inteligentes</h3>
-              <p className="text-slate-300">Refine sua busca com precisão cinematográfica</p>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Filtros Inteligentes
+              </h3>
+              <p className="text-slate-300">
+                Refine sua busca com precisão cinematográfica
+              </p>
             </div>
             <div className="bg-gradient-to-br from-blue-800/30 to-blue-600/30 backdrop-blur-lg rounded-xl p-6 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 hover:-translate-y-1">
               <Film className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Resultados Mágicos</h3>
-              <p className="text-slate-300">Recomendações personalizadas que surpreendem</p>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Resultados Mágicos
+              </h3>
+              <p className="text-slate-300">
+                Recomendações personalizadas que surpreendem
+              </p>
             </div>
           </div>
 
@@ -328,18 +372,62 @@ const Index = () => {
             </div>
           </button>
 
+          {/* Test Modal Button */}
+          <div className="mt-4 space-y-2">
+            <button
+              onClick={handleSupportClick}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mr-2"
+            >
+              TESTE: Abrir Modal Original
+            </button>
+            <button
+              onClick={() => setShowSupportModal(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2"
+            >
+              TESTE: Abrir Modal Direto
+            </button>
+            <button
+              onClick={() => setShowSimpleModal(true)}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+            >
+              ✅ TESTE: Modal Simples
+            </button>
+            <button
+              onClick={() => setShowUltraSimpleModal(true)}
+              className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded"
+            >
+              🚀 ULTRA SIMPLES
+            </button>
+          </div>
+
           {/* Footer Magic */}
           <div className="mt-16 text-slate-400 text-sm">
-            <p>✨ Preparado para descobrir sua próxima obsessão cinematográfica? ✨</p>
+            <p>
+              ✨ Preparado para descobrir sua próxima obsessão cinematográfica?
+              ✨
+            </p>
           </div>
         </div>
       </div>
 
       {/* All Modals */}
-      <SupportButton onClick={() => setShowSupportModal(true)} />
-      <SupportModal 
-        isOpen={showSupportModal} 
-        onClose={() => setShowSupportModal(false)} 
+      <SupportButton onClick={handleSupportClick} />
+      <SupportModal
+        isOpen={showSupportModal}
+        onClose={() => setShowSupportModal(false)}
+      />
+
+      <SimpleModal
+        isOpen={showSimpleModal}
+        onClose={() => setShowSimpleModal(false)}
+      />
+      <SimpleModal
+        isOpen={showSimpleModal}
+        onClose={() => setShowSimpleModal(false)}
+      />
+      <UltraSimpleModal
+        isOpen={showUltraSimpleModal}
+        onClose={() => setShowUltraSimpleModal(false)}
       />
       <FavoritesModal
         isOpen={showFavoritesModal}

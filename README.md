@@ -32,7 +32,11 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Configure environment variables
+cp .env.example .env
+# Edit the .env file with your actual API keys
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
@@ -59,6 +63,28 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+
+## Environment Variables
+
+This project requires the following environment variables to be configured:
+
+- `VITE_GEMINI_API_KEY`: Your Google Gemini API key
+- `VITE_TMDB_API_KEY`: Your TMDB (The Movie Database) API key
+- `VITE_MERCADOPAGO_ACCESS_TOKEN`: Your MercadoPago access token (for payment features)
+
+Copy `.env.example` to `.env` and fill in your actual API keys.
+
+## Performance Optimizations
+
+This project includes several performance optimizations:
+
+- **Code Splitting**: Automatic chunk splitting for better loading times
+- **Lazy Loading**: Components and pages loaded on demand
+- **Query Caching**: Optimized data fetching with TanStack Query
+- **Image Optimization**: Lazy loading images with intersection observer
+- **Bundle Analysis**: Use `npm run build:analyze` to analyze bundle size
+
+See [OPTIMIZATIONS.md](./OPTIMIZATIONS.md) for detailed information about all optimizations.
 
 ## How can I deploy this project?
 
