@@ -373,32 +373,6 @@ const Index = () => {
           </button>
 
           {/* Test Modal Button */}
-          <div className="mt-4 space-y-2">
-            <button
-              onClick={handleSupportClick}
-              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mr-2"
-            >
-              TESTE: Abrir Modal Original
-            </button>
-            <button
-              onClick={() => setShowSupportModal(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2"
-            >
-              TESTE: Abrir Modal Direto
-            </button>
-            <button
-              onClick={() => setShowSimpleModal(true)}
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-            >
-              ✅ TESTE: Modal Simples
-            </button>
-            <button
-              onClick={() => setShowUltraSimpleModal(true)}
-              className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded"
-            >
-              🚀 ULTRA SIMPLES
-            </button>
-          </div>
 
           {/* Footer Magic */}
           <div className="mt-16 text-slate-400 text-sm">
