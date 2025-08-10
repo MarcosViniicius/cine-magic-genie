@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Star, Sparkles, Wand2, Film, Search, Settings } from "lucide-react";
 import QuizStep from "../components/QuizStep";
 import FiltersStep from "../components/FiltersStep";
@@ -24,12 +25,23 @@ import { tmdbService } from "../services/tmdbService";
 import { useToast } from "../hooks/use-toast";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<
     "welcome" | "quiz" | "filters" | "results"
   >("welcome");
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [filters, setFilters] = useState<MovieFilters>({});
   const [showSupportModal, setShowSupportModal] = useState(false);
+
+  // Exibe o modal de apoio automaticamente 5s após mostrar o resultado final
+  useEffect(() => {
+    if (currentStep === "results") {
+      const timer = setTimeout(() => {
+        setShowSupportModal(true);
+      }, 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep]);
   const [showSimpleModal, setShowSimpleModal] = useState(false);
   const [showUltraSimpleModal, setShowUltraSimpleModal] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
@@ -385,6 +397,7 @@ const Index = () => {
       </div>
 
       {/* All Modals */}
+
       <SupportButton onClick={handleSupportClick} />
       <SupportModal
         isOpen={showSupportModal}

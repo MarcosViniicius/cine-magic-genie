@@ -121,9 +121,23 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center animate-pulse-heart">
               <Heart className="w-5 h-5 text-white" />
             </div>
+            <style>
+              {`
+              @keyframes pulse-heart {
+                0% { transform: scale(1); }
+                30% { transform: scale(1.18); }
+                50% { transform: scale(1.08); }
+                70% { transform: scale(1.18); }
+                100% { transform: scale(1); }
+              }
+              .animate-pulse-heart {
+                animation: pulse-heart 1.2s infinite;
+              }
+              `}
+            </style>
             <h3 className="text-xl font-bold text-white">Apoie o Projeto</h3>
           </div>
           <button
@@ -143,13 +157,6 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
             <div className="bg-gradient-to-r from-pink-800/30 to-purple-800/30 rounded-xl p-4 border border-pink-500/30">
               <div className="text-3xl font-bold text-white mb-2">R$ 5,00</div>
               <p className="text-pink-300 text-sm">Contribuição única</p>
-            </div>
-            <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-              <p className="text-yellow-300 text-sm flex items-center justify-center gap-2">
-                <AlertCircle className="w-4 h-4" />
-                Modo de demonstração - Configure o token do MercadoPago para
-                pagamentos reais
-              </p>
             </div>
           </div>
 

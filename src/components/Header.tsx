@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { Menu, Heart, History, Star, Settings } from 'lucide-react';
+import React, { useState } from "react";
+import { Menu, Heart, History, Star, Settings } from "lucide-react";
 
 interface HeaderProps {
   onOpenFavorites: () => void;
@@ -8,22 +7,40 @@ interface HeaderProps {
   onOpenSettings: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenFavorites, onOpenHistory, onOpenSettings }) => {
+const Header: React.FC<HeaderProps> = ({
+  onOpenFavorites,
+  onOpenHistory,
+  onOpenSettings,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo e Título */}
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <Star className="w-6 h-6 text-white" />
+        <a href="/">
+          <div className="flex items-center space-x-3 transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-105">
+            <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center animate-pulse-custom">
+              <Star className="w-6 h-6 text-white" />
+            </div>
+
+            <div>
+              <h1 className="text-xl font-bold text-white">Cinemind AI</h1>
+              <p className="text-xs text-slate-400">Seu Cine-Gênio pessoal</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">Cinemind AI</h1>
-            <p className="text-xs text-slate-400">Seu Cine-Gênio pessoal</p>
-          </div>
-        </div>
+        </a>
+        <style>
+          {`
+            @keyframes pulse-custom {
+              0%, 100% { transform: scale(1); }
+              50% { transform: scale(1.15); }
+            }
+            .animate-pulse-custom {
+              animation: pulse-custom 2s infinite;
+            }
+          `}
+        </style>
 
         {/* Menu Hambúrguer */}
         <div className="relative">
